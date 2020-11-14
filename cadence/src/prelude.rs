@@ -27,3 +27,4 @@
 //! ```
 
 pub use crate::client::{Counted, Gauged, Histogrammed, Metered, MetricClient, Setted, Timed};
+pub use crate::compat::Compat;

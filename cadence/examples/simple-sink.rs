@@ -25,4 +25,5 @@ fn main() {
     metrics.time("example.timer", 32).unwrap();
     metrics.histogram("example.histogram", 22).unwrap();
     metrics.meter("example.meter", 8).unwrap();
+    metrics.set("example.set", 44).unwrap();
 }
