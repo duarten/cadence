@@ -14,14 +14,13 @@
 
 use cadence::prelude::*;
 use cadence::{BufferedSpyMetricSink, StatsdClient};
-use std::sync::{Arc, Mutex};
 
 fn main() {
-    let our_writer = Arc::new(Mutex::new(Vec::new()));
-
     // Ensure that the sink is dropped, forcing a flush of all buffered metrics.
-    {
-        let sink = BufferedSpyMetricSink::with_capacity(our_writer.clone(), 16);
+    let rx = {
+        // Use a buffer size larger than any metrics here so we can demonstrate that
+        // each metric ends up with a newline (\n) after it.
+        let (rx, sink) = BufferedSpyMetricSink::with_capacity(None, Some(64));
         let metrics = StatsdClient::from_sink("example.prefix", sink);
 
         metrics.count("example.counter", 1).unwrap();
@@ -30,8 +29,20 @@ fn main() {
         metrics.histogram("example.histogram", 22).unwrap();
         metrics.meter("example.meter", 8).unwrap();
         metrics.set("example.set", 43).unwrap();
+        rx
+    };
+
+    let mut buffer = Vec::new();
+    loop {
+        match rx.try_recv() {
+            Ok(v) => {
+                buffer.extend(v);
+            }
+            Err(_) => {
+                break;
+            }
+        }
     }
 
-    let buffer = our_writer.lock().unwrap();
-    println!("Contents of wrapped buffer: {:?}", buffer);
+    println!("Contents of wrapped buffer:\n{}", String::from_utf8(buffer).unwrap());
 }
