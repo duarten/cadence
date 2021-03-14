@@ -33,15 +33,8 @@ fn read_all_metrics() -> Vec<String> {
     let mut out = Vec::new();
     let rx = unsafe { RX.clone().unwrap() };
 
-    loop {
-        match rx.try_recv() {
-            Ok(v) => {
-                out.push(String::from_utf8(v).unwrap());
-            }
-            Err(_) => {
-                break;
-            }
-        }
+    while let Ok(v) = rx.try_recv() {
+        out.push(String::from_utf8(v).unwrap());
     }
 
     out

@@ -33,15 +33,8 @@ fn main() {
     };
 
     let mut buffer = Vec::new();
-    loop {
-        match rx.try_recv() {
-            Ok(v) => {
-                buffer.extend(v);
-            }
-            Err(_) => {
-                break;
-            }
-        }
+    while let Ok(v) = rx.try_recv() {
+        buffer.extend(v);
     }
 
     println!("Contents of wrapped buffer:\n{}", String::from_utf8(buffer).unwrap());
